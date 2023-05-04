@@ -166,7 +166,8 @@ bool SimpleDistortionAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleDistortionAudioProcessor::createEditor()
 {
-    return new SimpleDistortionAudioProcessorEditor (*this);
+    //return new SimpleDistortionAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -181,6 +182,20 @@ void SimpleDistortionAudioProcessor::setStateInformation (const void* data, int 
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+//This is where we create the actual layout [STEP 2]
+juce::AudioProcessorValueTreeState::ParameterLayout SimpleDistortionAudioProcessor::createParamLayout() 
+{
+    APVTS::ParameterLayout layout;
+
+    using namespace juce;
+
+    auto driveRange = NormalisableRange<float>(-36, 36, .1, 1);
+
+    layout.add(std::make_unique<AudioParameterFloat>("Drive", "Drive", driveRange, 0));
+
+    return layout;
 }
 
 //==============================================================================

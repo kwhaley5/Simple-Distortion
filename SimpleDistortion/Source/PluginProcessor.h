@@ -56,7 +56,16 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    //This allows you to connect the buttons on your GUI to actual change in the audio [STEP 1]
+    using APVTS = juce::AudioProcessorValueTreeState;
+    static APVTS::ParameterLayout createParamLayout();
+
+    //creates apvts, still need to figure out what these all mean
+    APVTS apvts{ *this, nullptr, "parameters", createParamLayout() };
+
 private:
+    //juce does not have distortion dsp, but we will research to see how we can add that. 
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDistortionAudioProcessor)
 };

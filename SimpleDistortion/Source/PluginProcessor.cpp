@@ -22,6 +22,7 @@ SimpleDistortionAudioProcessor::SimpleDistortionAudioProcessor()
                        )
 #endif
 {
+    //drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Drive")); //This is the implemntation of our drive knob. 
 }
 
 SimpleDistortionAudioProcessor::~SimpleDistortionAudioProcessor()
@@ -95,6 +96,12 @@ void SimpleDistortionAudioProcessor::prepareToPlay (double sampleRate, int sampl
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+
+    //This is the preprocessor for audio running through. I don't think I'll need this, we shall see. 
+    juce::dsp::ProcessSpec spec;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = getTotalNumOutputChannels();
+    spec.sampleRate = sampleRate;
 }
 
 void SimpleDistortionAudioProcessor::releaseResources()
@@ -150,6 +157,9 @@ void SimpleDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
+
+
+
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
@@ -166,8 +176,8 @@ bool SimpleDistortionAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleDistortionAudioProcessor::createEditor()
 {
-    //return new SimpleDistortionAudioProcessorEditor (*this);
-    return new juce::GenericAudioProcessorEditor(*this);
+    return new SimpleDistortionAudioProcessorEditor (*this);
+    //return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -176,12 +186,22 @@ void SimpleDistortionAudioProcessor::getStateInformation (juce::MemoryBlock& des
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+
+    // Use this to get state information, [STEP 4A]
+    juce::MemoryOutputStream mos(destData, true);
+    apvts.state.writeToStream(mos);
 }
 
 void SimpleDistortionAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+
+    //And set the state [STEP 4B]
+    auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
+    if (tree.isValid()) {
+        apvts.replaceState(tree);
+    }
 }
 
 //This is where we create the actual layout [STEP 2]
@@ -194,6 +214,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleDistortionAudioProcess
     auto driveRange = NormalisableRange<float>(-36, 36, .1, 1);
 
     layout.add(std::make_unique<AudioParameterFloat>("Drive", "Drive", driveRange, 0));
+    layout.add(std::make_unique<AudioParameterFloat>("Range", "Range", driveRange, 0));
+    layout.add(std::make_unique<AudioParameterFloat>("Blend", "Blend", driveRange, 0));
+    layout.add(std::make_unique<AudioParameterFloat>("Volume", "Volume", driveRange, 0));
 
     return layout;
 }

@@ -60,11 +60,18 @@ public:
     using APVTS = juce::AudioProcessorValueTreeState;
     static APVTS::ParameterLayout createParamLayout();
 
-    //creates apvts, still need to figure out what these all mean
+    //creates apvts layout, but does not create APVTS
     APVTS apvts{ *this, nullptr, "parameters", createParamLayout() };
 
 private:
-    //juce does not have distortion dsp, but we will research to see how we can add that. 
+    //This is how we create all the pointers to the actual values of our parameters [STEP 3]
+
+    //This will be the start of actually making distortion. I will like the waveshaper to the drive knob
+    enum
+    {
+        waveshaperIndex                
+    };
+    juce::dsp::ProcessorChain<juce::dsp::WaveShaper<float>> waveShaper;
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDistortionAudioProcessor)

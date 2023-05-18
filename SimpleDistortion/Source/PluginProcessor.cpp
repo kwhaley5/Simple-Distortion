@@ -22,7 +22,11 @@ SimpleDistortionAudioProcessor::SimpleDistortionAudioProcessor()
                        )
 #endif
 {
-    //drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Drive")); //This is the implemntation of our drive knob. 
+    //auto drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Drive")); //This is the implemntation of our drive knob. 
+    //auto range = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Range"));
+    //auto blend = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Blend"));
+    //auto volume = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Volume"));
+
 }
 
 SimpleDistortionAudioProcessor::~SimpleDistortionAudioProcessor()
@@ -158,13 +162,27 @@ void SimpleDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
 
-
+    //auto drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Drive")); //This is the implemntation of our drive knob. 
+    auto drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Drive"));
+    auto range = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Range"));
+    auto blend = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Blend"));
+    auto volume = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Volume"));
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
 
-        // ..do something to the data...
+        for (int sample = 0; sample < buffer.getNumSamples(); sample++) {
+
+            auto cleanSig = *channelData; //gets the clean signal
+
+            *channelData *= *drive * *range; //multiplies over 1
+
+            *channelData = ((((2.f / juce::float_Pi) * atan(*channelData) * *blend) + (cleanSig * (1.f/ *blend))) / 2) * *volume; //clips back down to one, and mixes the cleansig, if present
+
+
+            channelData++;
+        }
     }
 }
 
@@ -211,12 +229,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleDistortionAudioProcess
 
     using namespace juce;
 
-    auto driveRange = NormalisableRange<float>(-36, 36, .1, 1);
+    auto driveRange = NormalisableRange<float>(0, 10, .01, 1);
+    auto volumeRange = NormalisableRange<float>(0, 1, .01, 1);
 
     layout.add(std::make_unique<AudioParameterFloat>("Drive", "Drive", driveRange, 0));
-    layout.add(std::make_unique<AudioParameterFloat>("Range", "Range", driveRange, 0));
-    layout.add(std::make_unique<AudioParameterFloat>("Blend", "Blend", driveRange, 0));
-    layout.add(std::make_unique<AudioParameterFloat>("Volume", "Volume", driveRange, 0));
+    layout.add(std::make_unique<AudioParameterFloat>("Range", "Range", volumeRange, 0));
+    layout.add(std::make_unique<AudioParameterFloat>("Blend", "Blend", volumeRange, 0));
+    layout.add(std::make_unique<AudioParameterFloat>("Volume", "Volume", volumeRange, 0));
 
     return layout;
 }

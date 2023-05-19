@@ -64,8 +64,11 @@ public:
     APVTS apvts{ *this, nullptr, "parameters", createParamLayout() };
 
 private:
-    //This is how we create all the pointers to the actual values of our parameters [STEP 3]
-
+    //This is how we create all the pointers to the actual values of our parameters, allows for cached values, runs faster [STEP 3]
+    juce::AudioParameterFloat* drive { nullptr };
+    juce::AudioParameterFloat* range { nullptr };
+    juce::AudioParameterFloat* blend { nullptr };
+    juce::AudioParameterFloat* volume { nullptr };
     //This will be the start of actually making distortion. I will like the waveshaper to the drive knob
     enum
     {

@@ -11,21 +11,22 @@
 
 //==============================================================================
 SimpleDistortionAudioProcessor::SimpleDistortionAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                     #endif
-                       )
-#endif
+//#ifndef JucePlugin_PreferredChannelConfigurations
+//     : AudioProcessor (BusesProperties()
+//                     #if ! JucePlugin_IsMidiEffect
+//                      #if ! JucePlugin_IsSynth
+//                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
+//                      #endif
+//                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
+//                     #endif
+//                       )
+//#endif
 {
-    //auto drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Drive")); //This is the implemntation of our drive knob. 
-    //auto range = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Range"));
-    //auto blend = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Blend"));
-    //auto volume = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Volume"));
+    //This is so we can make cached instances, which will make this way faster.
+    /*auto drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Drive"));
+    auto range = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Range"));
+    auto blend = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Blend"));
+    auto volume = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Volume"));*/
 
 }
 
@@ -162,7 +163,6 @@ void SimpleDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
 
-    //auto drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Drive")); //This is the implemntation of our drive knob. 
     auto drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Drive"));
     auto range = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Range"));
     auto blend = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Blend"));
@@ -176,7 +176,7 @@ void SimpleDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
             auto cleanSig = *channelData; //gets the clean signal
 
-            *channelData *= *drive * *range; //multiplies over 1
+            *channelData *= drive->get() * range->get(); //multiplies over 1
 
             *channelData = ((((2.f / juce::float_Pi) * atan(*channelData) * *blend) + (cleanSig * (1.f/ *blend))) / 2) * *volume; //clips back down to one, and mixes the cleansig, if present
 
@@ -230,11 +230,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleDistortionAudioProcess
     using namespace juce;
 
     auto driveRange = NormalisableRange<float>(0, 10, .01, 1);
+    auto blendRange = NormalisableRange<float>(.01, 1, .01, 1);
     auto volumeRange = NormalisableRange<float>(0, 1, .01, 1);
 
     layout.add(std::make_unique<AudioParameterFloat>("Drive", "Drive", driveRange, 0));
     layout.add(std::make_unique<AudioParameterFloat>("Range", "Range", volumeRange, 0));
-    layout.add(std::make_unique<AudioParameterFloat>("Blend", "Blend", volumeRange, 0));
+    layout.add(std::make_unique<AudioParameterFloat>("Blend", "Blend", blendRange, 0));
     layout.add(std::make_unique<AudioParameterFloat>("Volume", "Volume", volumeRange, 0));
 
     return layout;

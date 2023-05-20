@@ -178,8 +178,7 @@ void SimpleDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
             *channelData *= drive->get() * range->get(); //multiplies over 1
 
-            *channelData = ((((2.f / juce::float_Pi) * atan(*channelData) * *blend) + (cleanSig * (1.f/ *blend))) / 2) * *volume; //clips back down to one, and mixes the cleansig, if present
-
+            *channelData = ((((2.f / juce::float_Pi) * tanh(*channelData) * *blend) + (cleanSig * (1.f - *blend))) / 2) * *volume; //clips back down to one, and mixes the cleansig, if present
 
             channelData++;
         }

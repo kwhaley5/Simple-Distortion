@@ -10,6 +10,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
+
 SimpleDistortionAudioProcessorEditor::SimpleDistortionAudioProcessorEditor (SimpleDistortionAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p), driveAT(audioProcessor.apvts, "Drive", drive), 
     rangeAT(audioProcessor.apvts, "Range", range), 
@@ -18,6 +19,8 @@ SimpleDistortionAudioProcessorEditor::SimpleDistortionAudioProcessorEditor (Simp
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
+
+    setLookAndFeel(&laf);
 
     //this is where you make the slider types and make them visible. MAKE SURE TO MAKE BOUNDING BOXES OTHERWISE THEY WILL NOT SHOW UP
     drive.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
@@ -41,6 +44,7 @@ SimpleDistortionAudioProcessorEditor::SimpleDistortionAudioProcessorEditor (Simp
 
 SimpleDistortionAudioProcessorEditor::~SimpleDistortionAudioProcessorEditor()
 {
+    setLookAndFeel(nullptr);
 }
 
 //==============================================================================
@@ -82,3 +86,5 @@ void SimpleDistortionAudioProcessorEditor::resized()
     auto volumeArea = bounds.removeFromLeft(bounds.getWidth());
     volume.setBounds(volumeArea);
 }
+
+

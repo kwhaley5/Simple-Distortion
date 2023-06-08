@@ -39,7 +39,7 @@ SimpleDistortionAudioProcessorEditor::SimpleDistortionAudioProcessorEditor (Simp
     volume.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
     addAndMakeVisible(volume);
 
-    setSize (600, 200);
+    setSize (800, 250);
 }
 
 SimpleDistortionAudioProcessorEditor::~SimpleDistortionAudioProcessorEditor()
@@ -54,12 +54,25 @@ void SimpleDistortionAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     auto bounds = getLocalBounds();
-    auto driveArea = bounds.removeFromLeft(bounds.getWidth() * .25);
-    auto rangeArea = bounds.removeFromLeft(bounds.getWidth() * .33);
-    auto blendArea = bounds.removeFromLeft(bounds.getWidth() * .5);
-    auto volumeArea = bounds.removeFromLeft(bounds.getWidth());
 
-    g.setColour (juce::Colours::white);
+    auto inputMeter = bounds.removeFromLeft(bounds.getWidth() * .125);
+    auto outputMeter = bounds.removeFromRight(bounds.getWidth() * .125);
+
+    auto logoSpace = bounds.removeFromTop(bounds.getHeight() * .2);
+
+    auto driveArea = bounds.removeFromLeft(bounds.getWidth() * .25);
+    driveArea = driveArea.removeFromBottom(bounds.getHeight() * .4);
+
+    auto rangeArea = bounds.removeFromLeft(bounds.getWidth() * .33);
+    rangeArea = rangeArea.removeFromBottom(bounds.getHeight() * .4);
+
+    auto blendArea = bounds.removeFromLeft(bounds.getWidth() * .5);
+    blendArea = blendArea.removeFromBottom(bounds.getHeight() * .4);
+
+    auto volumeArea = bounds.removeFromLeft(bounds.getWidth());
+    volumeArea = volumeArea.removeFromBottom(bounds.getHeight() * .4);
+
+    g.setColour (juce::Colours::whitesmoke);
     g.setFont (15.0f);
     g.drawFittedText("Drive", driveArea, juce::Justification::centred, 1);
     g.drawFittedText("Range", rangeArea, juce::Justification::centred, 1);
@@ -73,6 +86,10 @@ void SimpleDistortionAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
     auto bounds = getLocalBounds();
+
+    auto inputMeter = bounds.removeFromLeft(bounds.getWidth() * .125);
+    auto outputMeter = bounds.removeFromRight(bounds.getWidth() * .125);
+    auto logoSpace = bounds.removeFromTop(bounds.getHeight() * .2);
 
     auto driveArea = bounds.removeFromLeft(bounds.getWidth() * .25);
     drive.setBounds(driveArea);

@@ -36,7 +36,7 @@ public:
             using namespace juce;
 
             auto unfill = Colours::black;
-            auto fill = Colours::cyan;
+            auto fill = Colour(64u, 194u, 230u);
 
             auto boundsFull = Rectangle<int>(x, y, width, height).toFloat();
             auto bounds = Rectangle<int>(x, y, width, height).toFloat().reduced(10);
@@ -77,20 +77,22 @@ public:
                 g.strokePath(valueArc, PathStrokeType(lineW/2, PathStrokeType::curved, PathStrokeType::rounded));
             }
 
-            auto thumbWidth = lineW * 2.0f;
-            Point<float> thumbPoint(bounds.getCentreX() + radius/rootTwo * std::cos(toAngle - MathConstants<float>::halfPi),
-                bounds.getCentreY() + radius/rootTwo * std::sin(toAngle - MathConstants<float>::halfPi));
+            //make circle with gradient
 
-            Point<float> shortLine(bounds.getCentreX() + (arcRadius - (arcRadius/ rootTwo)) * std::cos(toAngle - MathConstants<float>::halfPi),
-                bounds.getCentreY() + (arcRadius - (arcRadius/ rootTwo)) * std::sin(toAngle - MathConstants<float>::halfPi));
+            float radialBlur = radius * 2.5;
 
-            //make circle
+            auto grad = ColourGradient::ColourGradient(Colour(186u, 34u, 34u), bounds.getCentreX(), bounds.getCentreY(), Colours::black, radialBlur, radialBlur, true);
 
-            g.setColour(fill);
+            g.setGradientFill(grad);
             g.fillRoundedRectangle(boundsFull.getCentreX() - (radius * rootTwo / 2), boundsFull.getCentreY() - (radius * rootTwo / 2), radius * rootTwo, radius * rootTwo, radius * .7);
 
             //make dial line
-            g.setColour(Colours::white); //need to set gradient so it actually looks decent
+            g.setColour(Colours::whitesmoke); 
+            Point<float> thumbPoint(bounds.getCentreX() + radius / rootTwo * std::cos(toAngle - MathConstants<float>::halfPi), //This is one is farthest from center.
+                bounds.getCentreY() + radius / rootTwo * std::sin(toAngle - MathConstants<float>::halfPi));
+
+            Point<float> shortLine(bounds.getCentreX() + (arcRadius - (arcRadius / rootTwo)) * std::cos(toAngle - MathConstants<float>::halfPi), //This one is closer to the center
+                bounds.getCentreY() + (arcRadius - (arcRadius / rootTwo)) * std::sin(toAngle - MathConstants<float>::halfPi));
 
             g.drawLine(shortLine.getX(), shortLine.getY(), thumbPoint.getX(), thumbPoint.getY(), lineW / 2);
             //g.drawLine(bounds.getCentreX(), bounds.getCentreY(), thumbPoint.getX(), thumbPoint.getY(), lineW / 2)

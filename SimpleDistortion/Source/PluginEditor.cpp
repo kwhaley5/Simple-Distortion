@@ -22,6 +22,9 @@ SimpleDistortionAudioProcessorEditor::SimpleDistortionAudioProcessorEditor (Simp
 
     setLookAndFeel(&laf);
 
+    addAndMakeVisible(meterL);
+    addAndMakeVisible(meterR);
+
     //this is where you make the slider types and make them visible. MAKE SURE TO MAKE BOUNDING BOXES OTHERWISE THEY WILL NOT SHOW UP
     drive.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     drive.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 100, 20); //Still need to look into textbox.
@@ -40,6 +43,8 @@ SimpleDistortionAudioProcessorEditor::SimpleDistortionAudioProcessorEditor (Simp
     addAndMakeVisible(volume);
 
     setSize (800, 250);
+
+    startTimerHz(24); //render adjustment at 24 hz
 }
 
 SimpleDistortionAudioProcessorEditor::~SimpleDistortionAudioProcessorEditor()
@@ -47,16 +52,27 @@ SimpleDistortionAudioProcessorEditor::~SimpleDistortionAudioProcessorEditor()
     setLookAndFeel(nullptr);
 }
 
+void SimpleDistortionAudioProcessorEditor::timerCallback()
+{
+    //these get our rms level, and the set level function tells you how much of the rect you want
+    meterL.setLevel(audioProcessor.getRMSValue(0));
+    meterR.setLevel(audioProcessor.getRMSValue(1));
+
+    meterL.repaint();
+    meterR.repaint();
+}
+
 //==============================================================================
 void SimpleDistortionAudioProcessorEditor::paint (juce::Graphics& g)
 {
+    //This is where I'm making the text visible
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     auto bounds = getLocalBounds();
 
     auto inputMeter = bounds.removeFromLeft(bounds.getWidth() * .125);
-    auto outputMeter = bounds.removeFromRight(bounds.getWidth() * .125);
+    auto outputMeter = bounds.removeFromRight(bounds.getWidth() * .14);
 
     auto logoSpace = bounds.removeFromTop(bounds.getHeight() * .2);
 
@@ -84,11 +100,16 @@ void SimpleDistortionAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
+    //this is the actual dial/meter
 
     auto bounds = getLocalBounds();
 
     auto inputMeter = bounds.removeFromLeft(bounds.getWidth() * .125);
-    auto outputMeter = bounds.removeFromRight(bounds.getWidth() * .125);
+    auto meterLSide = inputMeter.removeFromLeft(inputMeter.getWidth() * .5);
+    meterL.setBounds(meterLSide);
+    meterR.setBounds(inputMeter);
+
+    auto outputMeter = bounds.removeFromRight(bounds.getWidth() * .14);
     auto logoSpace = bounds.removeFromTop(bounds.getHeight() * .2);
 
     auto driveArea = bounds.removeFromLeft(bounds.getWidth() * .25);

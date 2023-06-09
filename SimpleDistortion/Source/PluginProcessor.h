@@ -56,6 +56,8 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    float getRMSValue(int channel);
+
     //This allows you to connect the buttons on your GUI to actual change in the audio [STEP 1]
     using APVTS = juce::AudioProcessorValueTreeState;
     static APVTS::ParameterLayout createParamLayout();
@@ -69,12 +71,8 @@ private:
     juce::AudioParameterFloat* range { nullptr };
     juce::AudioParameterFloat* blend { nullptr };
     juce::AudioParameterFloat* volume { nullptr };
-    //This will be the start of actually making distortion. I will like the waveshaper to the drive knob
-    enum
-    {
-        waveshaperIndex                
-    };
-    juce::dsp::ProcessorChain<juce::dsp::WaveShaper<float>> waveShaper;
+
+    float rmsLevelLeft, rmsLevelRight;
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDistortionAudioProcessor)

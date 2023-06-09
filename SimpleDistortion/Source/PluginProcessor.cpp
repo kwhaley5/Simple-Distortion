@@ -147,6 +147,17 @@ void SimpleDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    rmsLevelLeft = juce::Decibels::gainToDecibels(buffer.getRMSLevel(0, 0, buffer.getNumSamples()));
+    rmsLevelRight = juce::Decibels::gainToDecibels(buffer.getRMSLevel(1, 0, buffer.getNumSamples()));
+
+    //added to fix graphical bug, rms levels when no music was playing was below -60
+    if (rmsLevelLeft < -60) {
+        rmsLevelLeft = -60;
+    }
+    if (rmsLevelRight < -60) {
+        rmsLevelRight = -60;
+    }
+
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
@@ -218,6 +229,20 @@ void SimpleDistortionAudioProcessor::setStateInformation (const void* data, int 
     auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
     if (tree.isValid()) {
         apvts.replaceState(tree);
+    }
+}
+
+float SimpleDistortionAudioProcessor::getRMSValue(int channel)
+{
+    jassert(channel == 0 || channel == 1);
+    if (channel == 0) {
+        return rmsLevelLeft;
+    }
+    else if (channel == 1) {
+        return rmsLevelRight;
+    }
+    else {
+        return 0.0f;
     }
 }
 

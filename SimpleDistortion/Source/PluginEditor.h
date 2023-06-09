@@ -143,6 +143,7 @@ private:
     SimpleDistortionAudioProcessor& audioProcessor;
     Laf laf;
     LevelMeter meterR, meterL;
+    LevelMeter outMeterR, outMeterL;
 
     //create the objects you want to control here. I declared these as sliders, and these are the types they can be: https://docs.juce.com/master/classSlider.html 
     juce::Slider drive, range, blend, volume;

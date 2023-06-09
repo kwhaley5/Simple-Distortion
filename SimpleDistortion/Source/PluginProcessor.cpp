@@ -194,6 +194,19 @@ void SimpleDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
             channelData++;
         }
     }
+
+    //Looks like it works...
+    rmsOutLevelLeft = juce::Decibels::gainToDecibels(buffer.getRMSLevel(0, 0, buffer.getNumSamples()));
+    rmsOutLevelRight = juce::Decibels::gainToDecibels(buffer.getRMSLevel(1, 0, buffer.getNumSamples()));
+
+    //added to fix graphical bug, rms levels when no music was playing was below -60
+    if (rmsOutLevelLeft < -60) {
+        rmsOutLevelLeft = -60;
+    }
+    if (rmsOutLevelRight < -60) {
+        rmsOutLevelRight = -60;
+    }
+
 }
 
 //==============================================================================
@@ -246,6 +259,20 @@ float SimpleDistortionAudioProcessor::getRMSValue(int channel)
     }
 }
 
+float SimpleDistortionAudioProcessor::getOutRMSValue(int channel)
+{
+    jassert(channel == 0 || channel == 1);
+    if (channel == 0) {
+        return rmsOutLevelLeft;
+    }
+    else if (channel == 1) {
+        return rmsOutLevelRight;
+    }
+    else {
+        return 0.0f;
+    }
+}
+
 //This is where we create the actual layout [STEP 2]
 juce::AudioProcessorValueTreeState::ParameterLayout SimpleDistortionAudioProcessor::createParamLayout() 
 {
@@ -258,7 +285,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleDistortionAudioProcess
     auto volumeRange = NormalisableRange<float>(0, 1, .01, 1);
 
     layout.add(std::make_unique<AudioParameterFloat>("Drive", "Drive", driveRange, 0));
-    layout.add(std::make_unique<AudioParameterFloat>("Range", "Range", volumeRange, 0));
+    layout.add(std::make_unique<AudioParameterFloat>("Range", "Range", blendRange, 0));
     layout.add(std::make_unique<AudioParameterFloat>("Blend", "Blend", blendRange, 0));
     layout.add(std::make_unique<AudioParameterFloat>("Volume", "Volume", volumeRange, 0));
 

@@ -57,6 +57,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     float getRMSValue(int channel);
+    float getOutRMSValue(int channel);
 
     //This allows you to connect the buttons on your GUI to actual change in the audio [STEP 1]
     using APVTS = juce::AudioProcessorValueTreeState;
@@ -73,6 +74,7 @@ private:
     juce::AudioParameterFloat* volume { nullptr };
 
     float rmsLevelLeft, rmsLevelRight;
+    float rmsOutLevelLeft, rmsOutLevelRight;
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDistortionAudioProcessor)

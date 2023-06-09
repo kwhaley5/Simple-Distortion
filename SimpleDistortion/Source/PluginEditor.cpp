@@ -24,22 +24,24 @@ SimpleDistortionAudioProcessorEditor::SimpleDistortionAudioProcessorEditor (Simp
 
     addAndMakeVisible(meterL);
     addAndMakeVisible(meterR);
+    addAndMakeVisible(outMeterL);
+    addAndMakeVisible(outMeterR);
 
     //this is where you make the slider types and make them visible. MAKE SURE TO MAKE BOUNDING BOXES OTHERWISE THEY WILL NOT SHOW UP
     drive.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
-    drive.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 100, 20); //Still need to look into textbox.
+    drive.setTextBoxStyle (juce::Slider::NoTextBox, false, 100, 20);
     addAndMakeVisible(drive);
 
     range.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    range.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
+    range.setTextBoxStyle(juce::Slider::NoTextBox, false, 100, 20);
     addAndMakeVisible(range);
 
     blend.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    blend.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
+    blend.setTextBoxStyle(juce::Slider::NoTextBox, false, 100, 20);
     addAndMakeVisible(blend);
 
     volume.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    volume.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
+    volume.setTextBoxStyle(juce::Slider::NoTextBox, false, 100, 20);
     addAndMakeVisible(volume);
 
     setSize (800, 250);
@@ -60,6 +62,12 @@ void SimpleDistortionAudioProcessorEditor::timerCallback()
 
     meterL.repaint();
     meterR.repaint();
+
+    outMeterL.setLevel(audioProcessor.getOutRMSValue(0));
+    outMeterR.setLevel(audioProcessor.getOutRMSValue(1));
+
+    outMeterL.repaint();
+    outMeterR.repaint();
 }
 
 //==============================================================================
@@ -72,7 +80,10 @@ void SimpleDistortionAudioProcessorEditor::paint (juce::Graphics& g)
     auto bounds = getLocalBounds();
 
     auto inputMeter = bounds.removeFromLeft(bounds.getWidth() * .125);
+    inputMeter = inputMeter.removeFromBottom(bounds.getHeight() * .1);
+
     auto outputMeter = bounds.removeFromRight(bounds.getWidth() * .14);
+    outputMeter = outputMeter.removeFromBottom(bounds.getHeight() * .1);
 
     auto logoSpace = bounds.removeFromTop(bounds.getHeight() * .2);
 
@@ -94,6 +105,8 @@ void SimpleDistortionAudioProcessorEditor::paint (juce::Graphics& g)
     g.drawFittedText("Range", rangeArea, juce::Justification::centred, 1);
     g.drawFittedText("Blend", blendArea, juce::Justification::centred, 1);
     g.drawFittedText("Volume", volumeArea, juce::Justification::centred, 1);
+    g.drawFittedText("In", inputMeter, juce::Justification::centred, 1);
+    g.drawFittedText("Out", outputMeter, juce::Justification::centred, 1);
 }
 
 void SimpleDistortionAudioProcessorEditor::resized()
@@ -110,6 +123,10 @@ void SimpleDistortionAudioProcessorEditor::resized()
     meterR.setBounds(inputMeter);
 
     auto outputMeter = bounds.removeFromRight(bounds.getWidth() * .14);
+    auto outMeterLSide = outputMeter.removeFromLeft(outputMeter.getWidth() * .5);
+    outMeterL.setBounds(outMeterLSide);
+    outMeterR.setBounds(outputMeter);
+
     auto logoSpace = bounds.removeFromTop(bounds.getHeight() * .2);
 
     auto driveArea = bounds.removeFromLeft(bounds.getWidth() * .25);

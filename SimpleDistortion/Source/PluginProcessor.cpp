@@ -11,22 +11,17 @@
 
 //==============================================================================
 SimpleDistortionAudioProcessor::SimpleDistortionAudioProcessor()
-//#ifndef JucePlugin_PreferredChannelConfigurations
-//     : AudioProcessor (BusesProperties()
-//                     #if ! JucePlugin_IsMidiEffect
-//                      #if ! JucePlugin_IsSynth
-//                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-//                      #endif
-//                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-//                     #endif
-//                       )
-//#endif
+#ifndef JucePlugin_PreferredChannelConfigurations
+     : AudioProcessor (BusesProperties()
+                     #if ! JucePlugin_IsMidiEffect
+                      #if ! JucePlugin_IsSynth
+                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
+                      #endif
+                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
+                     #endif
+                       )
+#endif
 {
-    //This is so we can make cached instances, which will make this way faster.
-    /*auto drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Drive"));
-    auto range = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Range"));
-    auto blend = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Blend"));
-    auto volume = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Volume"));*/
 
 }
 
@@ -102,7 +97,8 @@ void SimpleDistortionAudioProcessor::prepareToPlay (double sampleRate, int sampl
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 
-    //This is the preprocessor for audio running through. I don't think I'll need this, we shall see. 
+    //This is the preprocessor for audio running through. I don't think I'll need this, we shall see.
+    //Didn't use this, still need to figure out what this is for in the future, because I bet reverb and delay are going to need it
     juce::dsp::ProcessSpec spec;
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = getTotalNumOutputChannels();
@@ -147,6 +143,7 @@ void SimpleDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    //rms levels for meters
     rmsLevelLeft = juce::Decibels::gainToDecibels(buffer.getRMSLevel(0, 0, buffer.getNumSamples()));
     rmsLevelRight = juce::Decibels::gainToDecibels(buffer.getRMSLevel(1, 0, buffer.getNumSamples()));
 
@@ -174,6 +171,7 @@ void SimpleDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
 
+    //get the paremeters, that will be attached to the knobs, and do something with it.
     auto drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Drive"));
     auto range = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Range"));
     auto blend = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Blend"));
@@ -187,9 +185,9 @@ void SimpleDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
             auto cleanSig = *channelData; //gets the clean signal
 
-            *channelData *= drive->get() * range->get(); //multiplies over 1
+            *channelData *= drive->get() * range->get(); //the get method and pointing at the data achive the same result
 
-            *channelData = ((((2.f / juce::float_Pi) * tanh(*channelData) * *blend) + (cleanSig * (1.f - *blend))) / 2) * *volume; //clips back down to one, and mixes the cleansig, if present
+            *channelData = ((((2.f / juce::float_Pi) * tanh(*channelData) * (1.f - * blend)) + (cleanSig * *blend)) / 2) * *volume; //clips back down to one, and mixes the cleansig, if present
 
             channelData++;
         }
@@ -245,7 +243,7 @@ void SimpleDistortionAudioProcessor::setStateInformation (const void* data, int 
     }
 }
 
-float SimpleDistortionAudioProcessor::getRMSValue(int channel)
+float SimpleDistortionAudioProcessor::getRMSValue(int channel) //get function to provide the rms levels for the editor
 {
     jassert(channel == 0 || channel == 1);
     if (channel == 0) {
@@ -259,7 +257,7 @@ float SimpleDistortionAudioProcessor::getRMSValue(int channel)
     }
 }
 
-float SimpleDistortionAudioProcessor::getOutRMSValue(int channel)
+float SimpleDistortionAudioProcessor::getOutRMSValue(int channel) //same as above
 {
     jassert(channel == 0 || channel == 1);
     if (channel == 0) {
@@ -280,7 +278,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleDistortionAudioProcess
 
     using namespace juce;
 
-    auto driveRange = NormalisableRange<float>(0, 10, .01, 1);
+    auto driveRange = NormalisableRange<float>(1, 10, .01, 1);
     auto blendRange = NormalisableRange<float>(.01, 1, .01, 1);
     auto volumeRange = NormalisableRange<float>(0, 1, .01, 1);
 

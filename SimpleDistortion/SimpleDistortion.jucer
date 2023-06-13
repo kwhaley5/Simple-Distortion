@@ -3,6 +3,13 @@
 <JUCERPROJECT id="X6QhLk" name="SimpleDistortion" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" companyName="KiTiK Music">
   <MAINGROUP id="VNCMkg" name="SimpleDistortion">
+    <GROUP id="{4830D1E3-6DDE-8FA8-DB02-DAE7BFFEC208}" name="Assets">
+      <FILE id="xUGLr3" name="OFFSHORE.TTF" compile="0" resource="1" file="../../../../APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/OFFSHORE.TTF"/>
+      <FILE id="PkLtBR" name="KITIK_LOGO_preview.png" compile="0" resource="1"
+            file="../../../Muisc/Pictures/KITIK_LOGO_preview.png"/>
+      <FILE id="yWpN4n" name="KITIK_LOGO_NO_BKGD.png" compile="0" resource="1"
+            file="../../../Muisc/Pictures/KITIK_LOGO_NO_BKGD.png"/>
+    </GROUP>
     <GROUP id="{987502D4-4B79-DDEB-3DD9-2352DB9EC7B2}" name="Source">
       <FILE id="Eu8Hz3" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>

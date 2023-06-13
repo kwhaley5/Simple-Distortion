@@ -17,11 +17,10 @@ SimpleDistortionAudioProcessorEditor::SimpleDistortionAudioProcessorEditor (Simp
     blendAT(audioProcessor.apvts, "Blend", blend), 
     volumeAT(audioProcessor.apvts, "Volume", volume) //better to use a map as we get more parameters
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-
+    //allow me to overide knobs and create meters
     setLookAndFeel(&laf);
 
+    //create level Meters
     addAndMakeVisible(meterL);
     addAndMakeVisible(meterR);
     addAndMakeVisible(outMeterL);
@@ -74,10 +73,15 @@ void SimpleDistortionAudioProcessorEditor::timerCallback()
 void SimpleDistortionAudioProcessorEditor::paint (juce::Graphics& g)
 {
     //This is where I'm making the text visible
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
     auto bounds = getLocalBounds();
+    auto grad = juce::ColourGradient::ColourGradient(juce::Colour(186u, 34u, 34u), bounds.toFloat().getTopLeft(), juce::Colour(186u, 34u, 34u), bounds.toFloat().getBottomRight(), false);
+    grad.addColour(.5f, juce::Colours::transparentBlack);
+    //grad.addColour(.7f, juce::Colour(186u, 34u, 34u));
+
+    g.setGradientFill(grad);
+    //g.fillAll (juce::Colour(50u,30u,30u)); //create background
+    g.fillAll();
+    
 
     auto inputMeter = bounds.removeFromLeft(bounds.getWidth() * .125);
     inputMeter = inputMeter.removeFromBottom(bounds.getHeight() * .1);
@@ -85,8 +89,12 @@ void SimpleDistortionAudioProcessorEditor::paint (juce::Graphics& g)
     auto outputMeter = bounds.removeFromRight(bounds.getWidth() * .14);
     outputMeter = outputMeter.removeFromBottom(bounds.getHeight() * .1);
 
-    auto logoSpace = bounds.removeFromTop(bounds.getHeight() * .2);
+    //Making space for logo and text without distorting
+    auto infoSpace = bounds.removeFromTop(bounds.getHeight() * .35);
+    auto logoSpace = infoSpace.removeFromLeft(bounds.getWidth() * .425);
+    auto textSpace = infoSpace.removeFromRight(bounds.getWidth() * .425);
 
+    //Make space for Text. Note that knobs are defined by the APVTS create layout in the plugin processor, and they can be edited in resized
     auto driveArea = bounds.removeFromLeft(bounds.getWidth() * .25);
     driveArea = driveArea.removeFromBottom(bounds.getHeight() * .4);
 
@@ -99,20 +107,32 @@ void SimpleDistortionAudioProcessorEditor::paint (juce::Graphics& g)
     auto volumeArea = bounds.removeFromLeft(bounds.getWidth());
     volumeArea = volumeArea.removeFromBottom(bounds.getHeight() * .4);
 
+    //add logo
+    logo = juce::ImageCache::getFromMemory(BinaryData::KITIK_LOGO_NO_BKGD_png, BinaryData::KITIK_LOGO_NO_BKGD_pngSize);
+    g.drawImage(logo, infoSpace.toFloat());
+    //g.drawRect(infoSpace, 2.f);
+
+    //Add Text
+    newFont = juce::Font(juce::Typeface::createSystemTypefaceFor(BinaryData::OFFSHORE_TTF, BinaryData::OFFSHORE_TTFSize));
     g.setColour (juce::Colours::whitesmoke);
-    g.setFont (15.0f);
+    g.setFont(newFont);
+    g.setFont(30.f);
+    g.drawFittedText("Simple", logoSpace, juce::Justification::centredRight, 1);
+    g.drawFittedText("Distortion", textSpace, juce::Justification::centredLeft, 1);
+
+    g.setFont(juce::Font::Font()); //Return to original Font
+    g.setFont(15.f);
     g.drawFittedText("Drive", driveArea, juce::Justification::centred, 1);
     g.drawFittedText("Range", rangeArea, juce::Justification::centred, 1);
     g.drawFittedText("Blend", blendArea, juce::Justification::centred, 1);
     g.drawFittedText("Volume", volumeArea, juce::Justification::centred, 1);
     g.drawFittedText("In", inputMeter, juce::Justification::centred, 1);
     g.drawFittedText("Out", outputMeter, juce::Justification::centred, 1);
+
 }
 
 void SimpleDistortionAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
     //this is the actual dial/meter
 
     auto bounds = getLocalBounds();

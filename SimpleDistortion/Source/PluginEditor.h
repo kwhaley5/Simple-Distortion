@@ -36,7 +36,7 @@ public:
         {
             using namespace juce;
 
-            auto unfill = Colours::black;
+            auto unfill = Colour(15u,15u,15u);
             auto fill = Colour(64u, 194u, 230u);
 
             auto boundsFull = Rectangle<int>(x, y, width, height).toFloat();
@@ -79,13 +79,16 @@ public:
             }
 
             //make circle with gradient
-
             float radialBlur = radius * 2.5;
 
             auto grad = ColourGradient::ColourGradient(Colour(186u, 34u, 34u), bounds.getCentreX(), bounds.getCentreY(), Colours::black, radialBlur, radialBlur, true);
 
             g.setGradientFill(grad);
             g.fillRoundedRectangle(boundsFull.getCentreX() - (radius * rootTwo / 2), boundsFull.getCentreY() - (radius * rootTwo / 2), radius * rootTwo, radius * rootTwo, radius * .7);
+
+            //add circle around dial
+            g.setColour(Colours::lightslategrey);
+            g.drawRoundedRectangle(boundsFull.getCentreX() - (radius * rootTwo / 2), boundsFull.getCentreY() - (radius * rootTwo / 2), radius * rootTwo, radius * rootTwo, radius * .7, 1.5f);
 
             //make dial line
             g.setColour(Colours::whitesmoke);
@@ -129,11 +132,14 @@ public:
             g.fillRoundedRectangle(bounds.removeFromBottom(levelMeterFill), 5.f);
         }
 
+        //default value so the meters  are black when the plugin is launched
         void setLevel(float value) { level = value; }
 
     private:
         float level = -60.f;
     };
+
+    
 
 private:
 
@@ -144,14 +150,14 @@ private:
     Laf laf;
     LevelMeter meterR, meterL;
     LevelMeter outMeterR, outMeterL;
+    juce::Image logo;
+    juce::Font newFont;
 
     //create the objects you want to control here. I declared these as sliders, and these are the types they can be: https://docs.juce.com/master/classSlider.html 
     juce::Slider drive, range, blend, volume;
 
-
-    using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-
     //This allows us to attach our layout to these sliders
+    using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
     Attachment driveAT, rangeAT, blendAT, volumeAT;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDistortionAudioProcessorEditor)
